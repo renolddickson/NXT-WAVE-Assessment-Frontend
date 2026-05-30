@@ -51,6 +51,9 @@ export class DashboardComponent implements OnInit {
   isModalOpen = signal(false);
   selectedTask = signal<Task | null>(null);
 
+  // Active view toggle: 'board' or 'table'
+  activeView = signal<'board' | 'table'>('board');
+
   // Kanban status columns list
   readonly statuses: TaskStatus[] = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'BLOCKED', 'DONE'];
 
@@ -231,5 +234,9 @@ export class DashboardComponent implements OnInit {
 
   mathMin(a: number, b: number): number {
     return Math.min(a, b);
+  }
+
+  setView(view: 'board' | 'table'): void {
+    this.activeView.set(view);
   }
 }

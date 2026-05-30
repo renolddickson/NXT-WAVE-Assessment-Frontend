@@ -1,94 +1,100 @@
-<div>
-  <!-- Sub-label header -->
-  <div class="mb-6">
-    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Your assigned work and allowed status moves.</p>
-  </div>
+<div class="space-y-6">
+  <!-- Sub-label header & View Toggle -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
+    <p class="text-sm text-slate-600 leading-normal">
+      {{ isMember() ? 'Your assigned work and allowed status moves.' : 'Team tasks by status, owner, and priority.' }}
+    </p>
 
-  <!-- Dynamic Summary Cards Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <!-- Active Summary Card -->
-    <div class="bg-white border border-slate-200 rounded-lg p-5 flex items-center justify-between shadow-xs">
-      <div class="flex items-center space-x-4">
-        <div class="h-12 w-12 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center font-bold text-xl">
-          ⚡
-        </div>
-        <div>
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active</span>
-          <span class="block text-3xl font-extrabold text-slate-950 mt-1 leading-none">{{ activeTasks() }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Blocked Summary Card -->
-    <div class="bg-white border border-slate-200 rounded-lg p-5 flex items-center justify-between shadow-xs">
-      <div class="flex items-center space-x-4">
-        <div class="h-12 w-12 bg-red-50 text-red-500 rounded-lg flex items-center justify-center font-bold text-xl">
-          🚫
-        </div>
-        <div>
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Blocked</span>
-          <span class="block text-3xl font-extrabold text-slate-950 mt-1 leading-none">{{ blockedTasks() }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- High Priority Summary Card -->
-    <div class="bg-white border border-slate-200 rounded-lg p-5 flex items-center justify-between shadow-xs">
-      <div class="flex items-center space-x-4">
-        <div class="h-12 w-12 bg-amber-50 text-amber-500 rounded-lg flex items-center justify-center font-bold text-xl">
-          ⚠
-        </div>
-        <div>
-          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">High Priority</span>
-          <span class="block text-3xl font-extrabold text-slate-950 mt-1 leading-none">{{ highPriorityTasks() }}</span>
-        </div>
-      </div>
+    <!-- Board / Table View Toggle Buttons -->
+    <div class="flex items-center space-x-1 border border-slate-200 rounded-md p-0.5 bg-slate-50 shadow-xxs shrink-0 w-fit">
+      <button type="button" (click)="setView('board')"
+              [class]="activeView() === 'board' ? 'bg-white text-slate-900 shadow-xxs font-bold border border-slate-200/50' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+              class="px-3.5 py-1 rounded text-xs transition-all cursor-pointer">
+        Board View
+      </button>
+      <button type="button" (click)="setView('table')"
+              [class]="activeView() === 'table' ? 'bg-white text-slate-900 shadow-xxs font-bold border border-slate-200/50' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+              class="px-3.5 py-1 rounded text-xs transition-all cursor-pointer">
+        Table View
+      </button>
     </div>
   </div>
 
-  <!-- Filters Row -->
-  <div class="bg-white border border-slate-200 rounded-md p-4 mb-8 shadow-xxs">
-    <div class="flex flex-wrap items-center justify-between gap-4">
-      <div class="flex flex-wrap items-center gap-4">
-        <!-- Status Filter -->
-        <div class="flex items-center space-x-2">
-          <label class="text-xs font-semibold text-slate-500">Status</label>
-          <select [(ngModel)]="statusFilter" (change)="onFilterChange()" 
-                  class="block w-40 px-2.5 py-1.5 border border-slate-200 bg-white rounded-md text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 cursor-pointer">
-            <option value="">All statuses</option>
-            <option value="TODO">Todo</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="IN_REVIEW">In Review</option>
-            <option value="BLOCKED">Blocked</option>
-            <option value="DONE">Done</option>
-          </select>
-        </div>
+  <!-- Inline Error Alert -->
+  <div *ngIf="errorMessage()" class="bg-red-50 border border-red-200 p-3 rounded-md" role="alert">
+    <div class="flex justify-between items-center gap-4">
+      <p class="text-sm text-red-700">{{ errorMessage() }}</p>
+      <button (click)="errorMessage.set(null)" class="text-red-600 hover:text-red-800 cursor-pointer">✕</button>
+    </div>
+  </div>
 
-        <!-- Priority Filter -->
-        <div class="flex items-center space-x-2">
-          <label class="text-xs font-semibold text-slate-500">Priority</label>
-          <select [(ngModel)]="priorityFilter" (change)="onFilterChange()" 
-                  class="block w-40 px-2.5 py-1.5 border border-slate-200 bg-white rounded-md text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 cursor-pointer">
-            <option value="">All priorities</option>
-            <option value="LOW">LOW</option>
-            <option value="MEDIUM">MEDIUM</option>
-            <option value="HIGH">HIGH</option>
-          </select>
-        </div>
+  <!-- Summary Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-white border border-slate-200 rounded-md p-5 flex items-center gap-4 shadow-xxs">
+      <div class="h-11 w-11 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl">
+        ⚡
+      </div>
+      <div>
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active</div>
+        <div class="mt-1 text-3xl font-semibold text-slate-950 leading-none">{{ activeTasks() }}</div>
+      </div>
+    </div>
 
-        <!-- Assignee Filter (Only visible to non-members) -->
-        <div class="flex items-center space-x-2" *ngIf="!isMember()">
-          <label class="text-xs font-semibold text-slate-500">Assignee</label>
-          <select [(ngModel)]="assigneeFilter" (change)="onFilterChange()" 
-                  class="block w-44 px-2.5 py-1.5 border border-slate-200 bg-white rounded-md text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 cursor-pointer">
-            <option value="">All Assignees</option>
-            <option *ngFor="let u of usersList()" [value]="u.id">{{ u.name }}</option>
-          </select>
-        </div>
+    <div class="bg-white border border-slate-200 rounded-md p-5 flex items-center gap-4 shadow-xxs">
+      <div class="h-11 w-11 rounded-md bg-red-50 text-red-600 flex items-center justify-center font-bold text-xl">
+        🚫
+      </div>
+      <div>
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Blocked</div>
+        <div class="mt-1 text-3xl font-semibold text-slate-950 leading-none">{{ blockedTasks() }}</div>
+      </div>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-md p-5 flex items-center gap-4 shadow-xxs">
+      <div class="h-11 w-11 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xl">
+        ⚠
+      </div>
+      <div>
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">High priority</div>
+        <div class="mt-1 text-3xl font-semibold text-slate-950 leading-none">{{ highPriorityTasks() }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Area -->
+  <div class="bg-white border border-slate-200 rounded-md p-4 shadow-xxs">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+      <div>
+        <label class="block text-xs font-medium text-slate-650 mb-1">Status</label>
+        <select [(ngModel)]="statusFilter" (change)="onFilterChange()"
+                class="block w-full px-3 py-2 border border-slate-350 bg-slate-50 rounded-md text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 cursor-pointer">
+          <option value="">All statuses</option>
+          <option *ngFor="let status of statuses" [value]="status">{{ formatStatus(status) }}</option>
+        </select>
       </div>
 
-      <button (click)="clearFilters()" 
-              class="px-4 py-1.5 border border-slate-200 text-xs font-bold rounded-md text-slate-700 bg-white hover:bg-slate-50 transition-colors shadow-xxs cursor-pointer">
+      <div>
+        <label class="block text-xs font-medium text-slate-655 mb-1">Priority</label>
+        <select [(ngModel)]="priorityFilter" (change)="onFilterChange()"
+                class="block w-full px-3 py-2 border border-slate-350 bg-slate-50 rounded-md text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 cursor-pointer">
+          <option value="">All priorities</option>
+          <option value="LOW">Low</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="HIGH">High</option>
+        </select>
+      </div>
+
+      <div *ngIf="!isMember()">
+        <label class="block text-xs font-medium text-slate-655 mb-1">Assignee</label>
+        <select [(ngModel)]="assigneeFilter" (change)="onFilterChange()"
+                class="block w-full px-3 py-2 border border-slate-355 bg-slate-50 rounded-md text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 cursor-pointer">
+          <option value="">All assignees</option>
+          <option *ngFor="let user of usersList()" [value]="user.id">{{ user.name }}</option>
+        </select>
+      </div>
+
+      <button (click)="clearFilters()"
+              class="md:col-start-3 justify-self-start md:justify-self-end px-4 py-2 border border-slate-200 text-sm font-semibold rounded-md text-slate-700 bg-white hover:bg-slate-50 transition-colors shadow-xxs cursor-pointer">
         Clear
       </button>
     </div>
@@ -96,180 +102,242 @@
 
   <!-- Loading State Indicator -->
   <div *ngIf="isLoading()" class="flex justify-center items-center py-16">
-    <div class="flex flex-col items-center space-y-2">
+    <div class="flex flex-col items-center gap-3">
       <svg class="animate-spin h-7 w-7 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      <span class="text-xs text-slate-400">Loading board tasks...</span>
+      <span class="text-sm text-slate-500 font-medium">Loading tasks...</span>
     </div>
   </div>
 
-  <!-- Kanban Grid Layout -->
-  <div *ngIf="!isLoading()" class="grid grid-cols-1 lg:grid-cols-5 gap-5 items-start">
-    <!-- Loop Columns -->
-    <div *ngFor="let status of statuses" 
-         class="flex flex-col bg-slate-50/50 border border-slate-100 rounded-lg p-2.5 min-h-[450px]">
-      
-      <!-- Column Header -->
-      <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-200 px-1">
-        <div class="flex items-center space-x-2">
-          <span class="text-xs font-bold text-slate-700 tracking-wide">
-            {{ status === 'TODO' ? 'Todo' : 
-               status === 'IN_PROGRESS' ? 'In Progress' : 
-               status === 'IN_REVIEW' ? 'In Review' : 
-               status === 'BLOCKED' ? 'Blocked' : 'Done' }}
-          </span>
-          <span class="inline-flex items-center justify-center h-4.5 min-w-4.5 px-1.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
-            {{ getTasksByStatus(status).length }}
-          </span>
-        </div>
-        <!-- Plus Button to create task -->
-        <button *ngIf="!isMember() && status !== 'DONE'" (click)="openCreateModal()" 
-                class="text-slate-400 hover:text-slate-700 transition-colors p-0.5 rounded cursor-pointer">
-          <span class="text-sm font-bold">+</span>
-        </button>
-      </div>
+  <!-- Main View Renderings -->
+  <div *ngIf="!isLoading()">
+    <!-- 1. KANBAN BOARD VIEW -->
+    <div *ngIf="activeView() === 'board'" class="grid grid-cols-1 xl:grid-cols-5 gap-4 items-start">
+      <section *ngFor="let status of statuses" class="min-h-[540px] flex flex-col">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-3 px-1">
+          <div class="flex items-center gap-2">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wide">{{ formatStatus(status) }}</h3>
+            <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-50 border border-blue-100 px-1.5 text-xxs font-bold text-blue-600">
+              {{ getTasksByStatus(status).length }}
+            </span>
+          </div>
 
-      <!-- Column Card Container -->
-      <div class="flex-1 space-y-3.5 kanban-column">
-        <!-- Empty Column State -->
-        <div *ngIf="getTasksByStatus(status).length === 0" 
-             class="flex flex-col items-center justify-center py-20 text-center border border-dashed border-slate-250 rounded-md">
-          <span class="text-xxs font-semibold text-slate-400 uppercase tracking-wider">No tasks</span>
+          <button *ngIf="!isMember() && status !== 'DONE'"
+                  (click)="openCreateModal()"
+                  class="h-7 w-7 inline-flex items-center justify-center rounded-md text-slate-400 hover:bg-white hover:text-slate-900 transition-colors cursor-pointer"
+                  aria-label="Create task">
+            <span class="text-sm font-bold">+</span>
+          </button>
         </div>
 
-        <!-- Task Card -->
-        <div *ngFor="let task of getTasksByStatus(status)" 
-             class="bg-white border border-slate-200 rounded-md p-4 shadow-xxs hover:shadow-xs transition-shadow flex flex-col justify-between group relative">
-          
-          <div>
-            <!-- Priority and Action advancement -->
-            <div class="flex justify-between items-start mb-2.5">
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold border uppercase shrink-0"
-                    [ngClass]="getPriorityClass(task.priority)">
-                {{ task.priority }}
-              </span>
+        <!-- Cards Container -->
+        <div class="min-h-[500px] flex-1 rounded-md border border-dashed border-slate-200 bg-slate-50/50 p-2.5 space-y-3">
+          <div *ngIf="getTasksByStatus(status).length === 0" class="h-[450px] flex items-center justify-center">
+            <span class="text-xs italic text-slate-400 font-medium">No tasks</span>
+          </div>
 
-              <!-- Admin/Manager Quick Actions -->
-              <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" *ngIf="!isMember()">
-                <button (click)="openEditModal(task)" class="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer">
-                  <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                </button>
-                <button (click)="deleteTask(task.id)" class="text-red-400 hover:text-red-600 p-0.5 cursor-pointer">
-                  <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
+          <article *ngFor="let task of getTasksByStatus(status)"
+                   class="group bg-white border border-slate-200 rounded-md p-4 hover:border-slate-350 shadow-xxs hover:shadow-xs transition-all relative flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between gap-3">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded border text-[9px] font-bold uppercase shrink-0"
+                      [ngClass]="getPriorityClass(task.priority)">
+                  {{ formatStatus(task.priority) }}
+                </span>
+
+                <!-- Quick actions -->
+                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" *ngIf="!isMember()">
+                  <button (click)="openEditModal(task)" class="text-slate-400 hover:text-slate-700 p-0.5 cursor-pointer" aria-label="Edit task">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                  <button (click)="deleteTask(task.id)" class="text-red-400 hover:text-red-650 p-0.5 cursor-pointer" aria-label="Delete task">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <h4 class="mt-2.5 text-xs font-bold text-slate-900 leading-snug tracking-tight">{{ task.title }}</h4>
+              <p class="mt-1 text-[10px] text-slate-400 leading-normal line-clamp-2">{{ task.description }}</p>
+
+              <!-- Project Badge -->
+              <div *ngIf="task.Project" class="mt-3 inline-flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[9px] font-bold text-slate-500 w-fit">
+                <svg class="h-3 w-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+                <span class="truncate max-w-[100px]">{{ task.Project.name }}</span>
               </div>
             </div>
 
-            <!-- Task Main Title -->
-            <h4 class="text-xs font-bold text-slate-850 line-clamp-2 leading-tight tracking-tight">{{ task.title }}</h4>
-            <p class="text-[10px] text-slate-400 mt-1 line-clamp-2 leading-snug">{{ task.description }}</p>
-          </div>
+            <!-- Footer Meta -->
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
+              <div class="flex items-center justify-between gap-2 text-[10px] font-semibold text-slate-400">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <div class="h-5 w-5 rounded-full bg-slate-950 text-white flex items-center justify-center text-[9px] font-black shrink-0">
+                    {{ task.assigneeUser?.name?.charAt(0) || 'U' }}
+                  </div>
+                  <span class="truncate max-w-[80px] font-bold text-slate-700 leading-none">{{ task.assigneeUser?.name || 'Unassigned' }}</span>
+                </div>
+                <div class="flex items-center gap-0.5 shrink-0 text-[9px]">
+                  <svg class="h-3.5 w-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M5 11h14M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>{{ task.due_date | date:'MMM d' }}</span>
+                </div>
+              </div>
 
-          <!-- Metas & Footer -->
-          <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
-            <!-- Project Badge with Folder Icon -->
-            <div *ngIf="task.Project" class="flex items-center text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-150 rounded px-2 py-0.5 w-fit">
-              <svg class="h-3 w-3 mr-1 text-slate-450 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-              </svg>
-              <span>{{ task.Project.name }}</span>
+              <!-- Status advancement buttons -->
+              <div *ngIf="canAdvance(task) && getValidTransitions(task.status).length > 0" class="pt-2 border-t border-slate-100 flex flex-wrap gap-1">
+                <span class="text-[9px] font-bold text-slate-400 w-full mb-1">Move to:</span>
+                <button *ngFor="let next of getValidTransitions(task.status)"
+                        (click)="advanceStatus(task, next)"
+                        class="px-1.5 py-0.5 rounded border border-slate-200 bg-white text-[9px] font-extrabold text-slate-650 hover:bg-slate-50 cursor-pointer shadow-xxs">
+                  ➜ {{ formatStatus(next) }}
+                </button>
+              </div>
             </div>
+          </article>
+        </div>
+      </section>
+    </div>
 
-            <!-- Assignee and Due Date Metas -->
-            <div class="flex items-center justify-between gap-1 text-[10px] font-semibold text-slate-400 pt-1">
-              <div class="flex items-center space-x-1.5 min-w-0">
-                <div class="h-4.5 w-4.5 rounded-full bg-slate-950 text-white flex items-center justify-center font-black text-[9px] shrink-0">
+    <!-- 2. BULK TABLE VIEW (SDE II Polish) -->
+    <div *ngIf="activeView() === 'table' && totalTasks() > 0" class="overflow-x-auto border border-slate-200 rounded-lg shadow-xxs bg-white">
+      <table class="min-w-full divide-y divide-slate-200 text-left">
+        <thead class="bg-slate-50 text-xxs font-bold text-slate-400 uppercase tracking-wider">
+          <tr>
+            <th scope="col" class="px-6 py-3.5">Task Description</th>
+            <th scope="col" class="px-6 py-3.5">Project Scope</th>
+            <th scope="col" class="px-6 py-3.5">Assignee</th>
+            <th scope="col" class="px-6 py-3.5">Priority</th>
+            <th scope="col" class="px-6 py-3.5">Status Column</th>
+            <th scope="col" class="px-6 py-3.5">Due Date</th>
+            <th scope="col" class="px-6 py-3.5 text-right" *ngIf="!isMember()">Actions</th>
+          </tr>
+        </thead>
+        
+        <tbody class="divide-y divide-slate-100 text-xs text-slate-600">
+          <tr *ngFor="let task of tasks()" class="hover:bg-slate-50/50 transition-colors">
+            <!-- Task Info -->
+            <td class="px-6 py-4">
+              <div class="font-bold text-slate-900 leading-snug text-xs">{{ task.title }}</div>
+              <div class="text-[10px] text-slate-400 mt-1 line-clamp-1 leading-normal max-w-md">{{ task.description || 'No description provided.' }}</div>
+            </td>
+
+            <!-- Project -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span *ngIf="task.Project" class="inline-flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-xxs font-semibold text-slate-500">
+                {{ task.Project.name }}
+              </span>
+              <span *ngIf="!task.Project" class="text-slate-400 italic">No project</span>
+            </td>
+
+            <!-- Assignee -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center space-x-2">
+                <div class="h-6 w-6 rounded-full bg-slate-950 text-white flex items-center justify-center text-[9px] font-black shrink-0">
                   {{ task.assigneeUser?.name?.charAt(0) || 'U' }}
                 </div>
-                <span class="truncate max-w-[80px] text-slate-700 font-bold leading-none">{{ task.assigneeUser?.name || 'Unassigned' }}</span>
+                <span class="font-bold text-slate-700 leading-none">{{ task.assigneeUser?.name || 'Unassigned' }}</span>
               </div>
-              <div class="flex items-center shrink-0 text-slate-400">
-                <svg class="h-3 w-3 mr-0.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>{{ task.due_date | date:'MMM d' }}</span>
-              </div>
-            </div>
+            </td>
 
-            <!-- Status Advancement Controls (Visible to Assignee or Managers) -->
-            <div *ngIf="canAdvance(task) && getValidTransitions(task.status).length > 0" 
-                 class="pt-2 border-t border-slate-100 flex flex-wrap gap-1">
-              <span class="text-[9px] font-bold text-slate-400 w-full mb-1">Advance Status:</span>
-              <button *ngFor="let next of getValidTransitions(task.status)" 
-                      (click)="advanceStatus(task, next)"
-                      class="px-2 py-0.5 border border-slate-200 text-[9px] font-extrabold rounded bg-slate-50 hover:bg-slate-100 hover:text-slate-800 transition-colors text-slate-600 cursor-pointer shadow-xxs">
-                ➜ {{ next === 'TODO' ? 'Todo' : 
-                     next === 'IN_PROGRESS' ? 'In Progress' : 
-                     next === 'IN_REVIEW' ? 'In Review' : 
-                     next === 'BLOCKED' ? 'Blocked' : 'Done' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+            <!-- Priority -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2 py-0.5 rounded border text-[9px] font-bold uppercase shrink-0"
+                    [ngClass]="getPriorityClass(task.priority)">
+                {{ formatStatus(task.priority) }}
+              </span>
+            </td>
+
+            <!-- Status -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border"
+                    [ngClass]="{
+                      'bg-slate-50 text-slate-700 border-slate-200': task.status === 'TODO',
+                      'bg-blue-50 text-blue-700 border-blue-200': task.status === 'IN_PROGRESS',
+                      'bg-amber-50 text-amber-700 border-amber-200': task.status === 'IN_REVIEW',
+                      'bg-red-50 text-red-700 border-red-200': task.status === 'BLOCKED',
+                      'bg-emerald-50 text-emerald-700 border-emerald-200': task.status === 'DONE'
+                    }">
+                {{ formatStatus(task.status) }}
+              </span>
+            </td>
+
+            <!-- Due Date -->
+            <td class="px-6 py-4 whitespace-nowrap text-slate-500 font-medium">
+              {{ task.due_date | date:'MMM d, yyyy' }}
+            </td>
+
+            <!-- Actions (Edit/Delete) -->
+            <td class="px-6 py-4 whitespace-nowrap text-right text-xs font-semibold" *ngIf="!isMember()">
+              <div class="flex items-center justify-end space-x-3">
+                <button (click)="openEditModal(task)" class="text-slate-500 hover:text-slate-900 transition-colors cursor-pointer">
+                  Edit
+                </button>
+                <button (click)="deleteTask(task.id)" class="text-red-500 hover:text-red-700 transition-colors cursor-pointer">
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty view fallback -->
+    <div *ngIf="totalTasks() === 0" 
+         class="flex flex-col items-center justify-center py-20 bg-slate-50 border border-slate-200 border-dashed rounded-lg text-center mt-6">
+      <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+      <h3 class="mt-2 text-sm font-semibold text-slate-900 font-sans">No tasks found</h3>
+      <p class="mt-1 text-xs text-slate-500 font-sans">No tasks found matching current filters.</p>
+      <button (click)="clearFilters()" class="mt-6 px-3.5 py-1.5 border border-slate-200 text-xs font-bold rounded-md bg-white hover:bg-slate-50 text-slate-700 cursor-pointer shadow-xxs">
+        Clear filters
+      </button>
     </div>
   </div>
 
-  <!-- Pagination Controls -->
-  <div *ngIf="!isLoading() && totalTasks() > 0" 
-       class="mt-8 flex justify-between items-center border-t border-slate-200 pt-4 text-xs font-semibold text-slate-500">
+  <!-- Pagination Controller -->
+  <div *ngIf="!isLoading() && totalTasks() > 0" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-slate-200 pt-4 text-xs font-semibold text-slate-500">
     <div>
-      Showing tasks <span class="text-slate-800">{{ (currentPage() - 1) * pageSize + 1 }}</span> to 
-      <span class="text-slate-800">{{ mathMin(currentPage() * pageSize, totalTasks()) }}</span> of 
-      <span class="text-slate-800">{{ totalTasks() }}</span> total
+      Showing <span class="font-bold text-slate-800">{{ (currentPage() - 1) * pageSize + 1 }}</span>
+      to <span class="font-bold text-slate-800">{{ mathMin(currentPage() * pageSize, totalTasks()) }}</span>
+      of <span class="font-bold text-slate-800">{{ totalTasks() }}</span>
     </div>
-    <div class="flex items-center space-x-2">
-      <button (click)="goToPage(currentPage() - 1)" 
+    <div class="flex items-center gap-2">
+      <button (click)="goToPage(currentPage() - 1)"
               [disabled]="currentPage() === 1"
-              class="px-3 py-1.5 border border-slate-200 rounded-md bg-white hover:bg-slate-50 transition-colors shadow-xxs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
+              class="px-3 py-1.5 border border-slate-200 rounded-md bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xxs transition-colors">
         Prev
       </button>
       <span class="text-slate-700">Page {{ currentPage() }} of {{ totalPages() }}</span>
-      <button (click)="goToPage(currentPage() + 1)" 
+      <button (click)="goToPage(currentPage() + 1)"
               [disabled]="currentPage() === totalPages()"
-              class="px-3 py-1.5 border border-slate-200 rounded-md bg-white hover:bg-slate-50 transition-colors shadow-xxs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
+              class="px-3 py-1.5 border border-slate-200 rounded-md bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xxs transition-colors">
         Next
       </button>
     </div>
   </div>
 
-  <!-- Board Empty State -->
-  <div *ngIf="!isLoading() && totalTasks() === 0" 
-       class="flex flex-col items-center justify-center py-20 bg-slate-50 border border-slate-200 border-dashed rounded-lg text-center mt-6">
-    <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-    </svg>
-    <h3 class="mt-2 text-sm font-semibold text-slate-900">No tasks found</h3>
-    <p class="mt-1 text-xs text-slate-500">There are no tasks that match your filter parameters.</p>
-    <div class="mt-6 flex gap-2">
-      <button (click)="clearFilters()" 
-              class="px-3.5 py-1.5 border border-slate-200 text-xs font-semibold rounded-md bg-white hover:bg-slate-50 text-slate-700 transition-colors shadow-xxs cursor-pointer">
-        Clear filters
-      </button>
-      <button *ngIf="!isMember()" (click)="openCreateModal()" 
-              class="px-3.5 py-1.5 text-xs font-semibold rounded-md text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-xxs cursor-pointer">
-        Create first task
-      </button>
-    </div>
-  </div>
+  <!-- Bottom-right FAB Action Button -->
+  <button *ngIf="!isMember()" (click)="openCreateModal()"
+          class="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-105 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 z-40"
+          title="Create Task">
+    <span class="text-xl font-bold">+</span>
+  </button>
 </div>
 
-<!-- Bottom Right Floating Action Button (FAB) (Only shown for Admin & Manager) -->
-<button *ngIf="!isMember()" (click)="openCreateModal()" 
-        class="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center font-bold text-xl shadow-lg transition-transform hover:scale-105 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 z-40"
-        title="Create Task">
-  +
-</button>
-
-<!-- Task Create/Edit Dialog Overlay Modal -->
-<app-task-modal *ngIf="isModalOpen()" 
-                 [task]="selectedTask()" 
-                 (close)="closeModal()" 
+<!-- Task Create/Edit Modal Dialog -->
+<app-task-modal *ngIf="isModalOpen()"
+                 [task]="selectedTask()"
+                 (close)="closeModal()"
                  (saved)="onTaskSaved()">
 </app-task-modal>
