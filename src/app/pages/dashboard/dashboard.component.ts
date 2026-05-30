@@ -52,7 +52,7 @@ export class DashboardComponent implements OnInit {
   selectedTask = signal<Task | null>(null);
 
   // Active view toggle: 'board' or 'table'
-  activeView = signal<'board' | 'table'>('board');
+  activeView = signal<'board' | 'table'>('table');
 
   // Kanban status columns list
   readonly statuses: TaskStatus[] = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'BLOCKED', 'DONE'];
