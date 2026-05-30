@@ -10,15 +10,11 @@ const refreshTokenSubject = new BehaviorSubject<string | null>(null);
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
 
-  // Skip token attachment for auth endpoints
-  if (req.url.includes('/auth/login') || req.url.includes('/auth/register') || req.url.includes('/auth/refresh')) {
-    return next(req);
-  }
-
+  const isAuthEndpoint = req.url.includes('/auth/login') || req.url.includes('/auth/register') || req.url.includes('/auth/refresh');
   const token = authService.getAccessToken();
   let authReq = req;
   
-  if (token) {
+  if (token && !isAuthEndpoint) {
     authReq = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`
@@ -28,19 +24,39 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError(error => {
-      // Catch 401 responses
-      if (error.status === 401) {
+      // Catch 401 responses for non-auth endpoints to trigger token refresh
+      if (error.status === 401 && !isAuthEndpoint) {
         return handle401Error(authReq, next, authService);
       }
+      
       // Extract API validation errors cleanly
       return throwError(() => {
-        if (error.error && error.error.message) {
+        if (error.error) {
+          if (error.error.message) {
+            return {
+              status: error.status,
+              code: error.error.code || 'VALIDATION_ERROR',
+              message: error.error.message
+            };
+          }
+          if (error.error.error) {
+            return {
+              status: error.status,
+              code: 'VALIDATION_ERROR',
+              message: error.error.error
+            };
+          }
+        }
+        
+        // Handle explicit 401 on login
+        if (error.status === 401) {
           return {
-            status: error.status,
-            code: error.error.code || 'UNKNOWN_ERROR',
-            message: error.error.message
+            status: 401,
+            code: 'UNAUTHORIZED',
+            message: 'Invalid email or password.'
           };
         }
+        
         return {
           status: error.status,
           code: 'CONNECTION_ERROR',
