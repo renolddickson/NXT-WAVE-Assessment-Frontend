@@ -11,7 +11,7 @@ import { MOCK_PROJECTS } from '../models/mock-db';
 export class ProjectService {
   private readonly API_URL = 'http://localhost:3000/api/projects';
   
-  public useMock = true;
+  public useMock = false;
 
   constructor(private http: HttpClient) {}
 

@@ -11,8 +11,7 @@ import { MOCK_USERS } from '../models/mock-db';
 export class AuthService {
   private readonly API_URL = 'http://localhost:3000/api/auth';
   
-  // Frontend review mode. Set to false when running with the real API.
-  public useMock = true;
+  public useMock = false;
 
   // Signal for the current logged-in user
   readonly currentUser = signal<User | null>(this.loadUserFromStorage());
@@ -26,7 +25,19 @@ export class AuthService {
 
   private loadUserFromStorage(): User | null {
     const userJson = localStorage.getItem('user');
-    return userJson ? JSON.parse(userJson) : null;
+    if (!userJson || userJson === 'undefined' || userJson === 'null') {
+      localStorage.removeItem('user');
+      return null;
+    }
+
+    try {
+      return JSON.parse(userJson) as User;
+    } catch {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      return null;
+    }
   }
 
   getAccessToken(): string | null {
@@ -144,6 +155,10 @@ export class AuthService {
   }
 
   private saveSession(response: AuthResponse): void {
+    if (!response?.accessToken || !response?.refreshToken || !response?.user) {
+      throw new Error('Invalid auth response from server.');
+    }
+
     localStorage.setItem('accessToken', response.accessToken);
     localStorage.setItem('refreshToken', response.refreshToken);
     localStorage.setItem('user', JSON.stringify(response.user));

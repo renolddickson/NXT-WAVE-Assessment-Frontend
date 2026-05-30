@@ -21,7 +21,7 @@ export interface TasksResponse {
 export class TaskService {
   private readonly API_URL = 'http://localhost:3000/api/tasks';
   
-  public useMock = true;
+  public useMock = false;
 
   constructor(private http: HttpClient) {}
 

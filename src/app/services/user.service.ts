@@ -11,7 +11,7 @@ import { MOCK_USERS } from '../models/mock-db';
 export class UserService {
   private readonly API_URL = 'http://localhost:3000/api/users';
   
-  public useMock = true;
+  public useMock = false;
 
   constructor(private http: HttpClient) {}
 
