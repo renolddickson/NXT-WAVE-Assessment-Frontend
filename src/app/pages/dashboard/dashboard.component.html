@@ -258,16 +258,27 @@
 
             <!-- Status -->
             <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border"
-                    [ngClass]="{
-                      'bg-slate-50 text-slate-700 border-slate-200': task.status === 'TODO',
-                      'bg-blue-50 text-blue-700 border-blue-200': task.status === 'IN_PROGRESS',
-                      'bg-amber-50 text-amber-700 border-amber-200': task.status === 'IN_REVIEW',
-                      'bg-red-50 text-red-700 border-red-200': task.status === 'BLOCKED',
-                      'bg-emerald-50 text-emerald-700 border-emerald-200': task.status === 'DONE'
-                    }">
-                {{ formatStatus(task.status) }}
-              </span>
+              <div class="flex flex-col space-y-1.5">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border w-fit"
+                      [ngClass]="{
+                        'bg-slate-50 text-slate-700 border-slate-200': task.status === 'TODO',
+                        'bg-blue-50 text-blue-700 border-blue-200': task.status === 'IN_PROGRESS',
+                        'bg-amber-50 text-amber-700 border-amber-200': task.status === 'IN_REVIEW',
+                        'bg-red-50 text-red-700 border-red-200': task.status === 'BLOCKED',
+                        'bg-emerald-50 text-emerald-700 border-emerald-200': task.status === 'DONE'
+                      }">
+                  {{ formatStatus(task.status) }}
+                </span>
+                
+                <!-- Status Advancement controls inside Table View -->
+                <div *ngIf="canAdvance(task) && getValidTransitions(task.status).length > 0" class="flex flex-wrap gap-1">
+                  <button *ngFor="let next of getValidTransitions(task.status)"
+                          (click)="advanceStatus(task, next)"
+                          class="px-1.5 py-0.5 border border-slate-200 text-[9.5px] font-extrabold rounded bg-slate-50 hover:bg-slate-100 transition-colors text-slate-650 cursor-pointer shadow-xxs">
+                    ➜ {{ formatStatus(next) }}
+                  </button>
+                </div>
+              </div>
             </td>
 
             <!-- Due Date -->
