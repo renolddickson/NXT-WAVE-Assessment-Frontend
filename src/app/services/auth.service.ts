@@ -11,8 +11,8 @@ import { MOCK_USERS } from '../models/mock-db';
 export class AuthService {
   private readonly API_URL = 'http://localhost:3000/api/auth';
   
-  // Use mock mode during UI development
-  public useMock = false;
+  // Frontend review mode. Set to false when running with the real API.
+  public useMock = true;
 
   // Signal for the current logged-in user
   readonly currentUser = signal<User | null>(this.loadUserFromStorage());

@@ -1,62 +1,52 @@
-<div>
-  <!-- Header Title & Add Button -->
-  <div class="flex justify-between items-center border-b border-slate-100 pb-5 mb-6">
+<div class="bg-white border border-slate-200 rounded-md p-5">
+  <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center border-b border-slate-100 pb-5 mb-6">
     <div>
-      <h1 class="text-xl font-bold text-slate-900">Projects</h1>
-      <p class="text-xs text-slate-400 mt-1">Organize tasks under specific functional scopes</p>
+      <h1 class="text-lg font-semibold text-slate-900">Projects</h1>
+      <p class="text-sm text-slate-500 mt-1">Group tasks by product area or delivery stream.</p>
     </div>
-    <button *ngIf="!isMember()" (click)="toggleForm()" 
+    <button *ngIf="!isMember()" (click)="toggleForm()"
             class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-sm focus:outline-none cursor-pointer">
       <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
-      {{ showForm() ? 'Hide Form' : 'Add Project' }}
+      {{ showForm() ? 'Hide form' : 'Add project' }}
     </button>
   </div>
 
-  <!-- Inline Error Alert -->
   <div *ngIf="errorMessage()" class="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded" role="alert">
     <div class="flex justify-between items-center">
       <p class="text-xs text-red-700 font-medium">{{ errorMessage() }}</p>
-      <button (click)="errorMessage.set(null)" class="text-red-500 hover:text-red-700 cursor-pointer">✕</button>
+      <button (click)="errorMessage.set(null)" class="text-red-500 hover:text-red-700 cursor-pointer" aria-label="Dismiss error">x</button>
     </div>
   </div>
 
-  <!-- Inline Create/Edit Form Pane -->
-  <div *ngIf="showForm()" class="bg-slate-50 border border-slate-200 rounded-lg p-5 mb-6 transform transition-all duration-350">
+  <div *ngIf="showForm()" class="bg-stone-50 border border-slate-200 rounded-md p-5 mb-6 transform transition-all duration-300">
     <h3 class="text-sm font-semibold text-slate-900 mb-4">
-      {{ isEditing() ? 'Edit Project Details' : 'Add New Project' }}
+      {{ isEditing() ? 'Edit project' : 'Add project' }}
     </h3>
-    
+
     <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="space-y-4">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <!-- Project Name -->
         <div>
-          <label for="name" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-            Project Name
-          </label>
+          <label for="name" class="block text-xs font-semibold text-slate-700">Project name</label>
           <input type="text" id="name" formControlName="name"
-                 class="mt-1.5 block w-full px-3 py-2 border border-slate-250 rounded-md shadow-sm text-sm focus:outline-none focus:ring-slate-900 focus:border-slate-900"
+                 class="mt-1.5 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-slate-900 focus:border-slate-900"
                  [ngClass]="{'border-red-500 ring-red-500': projectForm.get('name')?.touched && projectForm.get('name')?.invalid}"
                  placeholder="e.g. Website Redesign">
           <div *ngIf="projectForm.get('name')?.touched && projectForm.get('name')?.invalid" class="mt-1 text-xs text-red-600">
-            <span *ngIf="projectForm.get('name')?.errors?.['required']">Project Name is required.</span>
-            <span *ngIf="projectForm.get('name')?.errors?.['maxlength']">Project Name cannot exceed 100 characters.</span>
+            <span *ngIf="projectForm.get('name')?.errors?.['required']">Project name is required.</span>
+            <span *ngIf="projectForm.get('name')?.errors?.['maxlength']">Project name cannot exceed 100 characters.</span>
           </div>
         </div>
 
-        <!-- Project Description -->
         <div>
-          <label for="description" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-            Description
-          </label>
+          <label for="description" class="block text-xs font-semibold text-slate-700">Description</label>
           <input type="text" id="description" formControlName="description"
-                 class="mt-1.5 block w-full px-3 py-2 border border-slate-250 rounded-md shadow-sm text-sm focus:outline-none focus:ring-slate-900 focus:border-slate-900"
-                 placeholder="e.g. Manage UI changes and mock assets.">
+                 class="mt-1.5 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-slate-900 focus:border-slate-900"
+                 placeholder="Short project description">
         </div>
       </div>
 
-      <!-- Action Buttons -->
       <div class="flex justify-end space-x-2 pt-2">
         <button type="button" (click)="toggleForm()" [disabled]="isLoading()"
                 class="px-3.5 py-1.5 border border-slate-200 text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 transition-colors cursor-pointer">
@@ -64,35 +54,32 @@
         </button>
         <button type="submit" [disabled]="isLoading()"
                 class="px-3.5 py-1.5 border border-transparent rounded-md text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer flex items-center">
-          <svg *ngIf="isLoading()" class="animate-spin -ml-1 mr-2 h-4.5 w-4.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg *ngIf="isLoading()" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          {{ isEditing() ? 'Update Project' : 'Create Project' }}
+          {{ isEditing() ? 'Update project' : 'Create project' }}
         </button>
       </div>
     </form>
   </div>
 
-  <!-- Loading State Indicator -->
   <div *ngIf="isLoading() && projects().length === 0" class="flex justify-center items-center py-12">
     <div class="flex flex-col items-center space-y-2">
       <svg class="animate-spin h-7 w-7 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      <span class="text-xs text-slate-400">Loading projects...</span>
+      <span class="text-xs text-slate-500">Loading projects...</span>
     </div>
   </div>
 
-  <!-- Projects Cards List -->
   <div *ngIf="!isLoading() && projects().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    <div *ngFor="let project of projects()" 
-         class="bg-white border border-slate-200 hover:border-slate-350 rounded-lg p-5 shadow-xxs transition-all flex flex-col justify-between group">
+    <div *ngFor="let project of projects()"
+         class="bg-white border border-slate-200 hover:border-slate-300 rounded-md p-5 transition-all flex flex-col justify-between group">
       <div>
         <div class="flex justify-between items-start gap-4">
           <h3 class="text-base font-semibold text-slate-900 group-hover:text-slate-950 transition-colors">{{ project.name }}</h3>
-          <!-- Actions Menu -->
           <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" *ngIf="!isMember()">
             <button (click)="startEdit(project)" class="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer" title="Edit Project">
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -109,24 +96,22 @@
         <p class="text-xs text-slate-500 mt-2 leading-relaxed line-clamp-3">{{ project.description || 'No description provided.' }}</p>
       </div>
 
-      <!-- Footer Project Info -->
-      <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xxs font-medium text-slate-400">
+      <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-medium text-slate-400">
         <span>ID: {{ project.id }}</span>
-        <span>Scope: Org Assigned</span>
+        <span>Organization scope</span>
       </div>
     </div>
   </div>
 
-  <!-- Empty Projects State -->
-  <div *ngIf="!isLoading() && projects().length === 0" 
-       class="flex flex-col items-center justify-center py-20 bg-slate-50 border border-slate-200 border-dashed rounded-lg text-center mt-6">
+  <div *ngIf="!isLoading() && projects().length === 0"
+       class="flex flex-col items-center justify-center py-20 bg-stone-50 border border-slate-200 border-dashed rounded-md text-center mt-6">
     <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
     </svg>
     <h3 class="mt-2 text-sm font-semibold text-slate-900">No projects found</h3>
-    <p class="mt-1 text-xs text-slate-500">Create a project scope to organize task board kanbans.</p>
+    <p class="mt-1 text-xs text-slate-500">Create a project scope to organize tasks.</p>
     <div class="mt-6" *ngIf="!isMember()">
-      <button (click)="toggleForm()" 
+      <button (click)="toggleForm()"
               class="px-3.5 py-2 text-xs font-semibold rounded-md text-white bg-slate-900 hover:bg-slate-800 transition-all shadow-sm cursor-pointer">
         Create first project
       </button>

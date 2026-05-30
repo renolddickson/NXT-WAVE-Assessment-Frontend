@@ -1,20 +1,18 @@
-<div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+<div class="min-h-screen flex flex-col justify-center bg-stone-50 py-12 sm:px-6 lg:px-8">
   <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
-    <div class="mx-auto h-12 w-12 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-sm">
+    <div class="mx-auto h-10 w-10 bg-slate-900 rounded flex items-center justify-center text-white font-semibold text-lg shadow-sm">
       T
     </div>
-    <h2 class="mt-6 text-3xl font-extrabold text-slate-950 tracking-tight">Sign in to your account</h2>
+    <h2 class="mt-5 text-2xl font-semibold text-slate-950 tracking-tight">Sign in</h2>
     <p class="mt-2 text-sm text-slate-500">
-      Or
       <a routerLink="/register" class="font-medium text-slate-900 hover:text-slate-700 underline underline-offset-4 cursor-pointer">
-        register a new organization
+        Register a new organization
       </a>
     </p>
   </div>
 
   <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-    <div class="bg-white py-8 px-4 border border-slate-200 shadow-sm rounded-lg sm:px-10">
-      <!-- Error Alert Pane -->
+    <div class="bg-white py-8 px-4 border border-slate-200 rounded-md sm:px-10">
       <div *ngIf="errorMessage()" class="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded" role="alert">
         <div class="flex">
           <div class="shrink-0">
@@ -30,14 +28,14 @@
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
         <div>
-          <label for="email" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+          <label for="email" class="block text-xs font-semibold text-slate-700">
             Email address
           </label>
           <div class="mt-1.5">
-            <input id="email" 
-                   type="email" 
-                   formControlName="email" 
-                   class="appearance-none block w-full px-3 py-2 border border-slate-250 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-slate-900 focus:border-slate-900 text-sm"
+            <input id="email"
+                   type="email"
+                   formControlName="email"
+                   class="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-slate-900 focus:border-slate-900 text-sm"
                    [ngClass]="{'border-red-500 ring-red-500': loginForm.get('email')?.touched && loginForm.get('email')?.invalid}"
                    placeholder="you@example.com">
           </div>
@@ -48,16 +46,16 @@
         </div>
 
         <div>
-          <label for="password" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+          <label for="password" class="block text-xs font-semibold text-slate-700">
             Password
           </label>
           <div class="mt-1.5">
-            <input id="password" 
-                   type="password" 
-                   formControlName="password" 
-                   class="appearance-none block w-full px-3 py-2 border border-slate-250 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-slate-900 focus:border-slate-900 text-sm"
+            <input id="password"
+                   type="password"
+                   formControlName="password"
+                   class="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-slate-900 focus:border-slate-900 text-sm"
                    [ngClass]="{'border-red-500 ring-red-500': loginForm.get('password')?.touched && loginForm.get('password')?.invalid}"
-                   placeholder="••••••••">
+                   placeholder="Password">
           </div>
           <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" class="mt-1 text-xs text-red-600">
             <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required.</span>
@@ -66,7 +64,7 @@
         </div>
 
         <div>
-          <button type="submit" 
+          <button type="submit"
                   [disabled]="isLoading()"
                   class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
             <svg *ngIf="isLoading()" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -78,10 +76,9 @@
         </div>
       </form>
 
-      <!-- Default Credentials Tip -->
-      <div class="mt-6 border-t border-slate-100 pt-4 text-center">
-        <p class="text-xs text-slate-400">Mock Accounts for Testing:</p>
-        <div class="mt-2 text-xxs text-slate-500 font-mono space-y-0.5">
+      <div class="mt-6 border-t border-slate-100 pt-4">
+        <p class="text-xs text-slate-500 font-medium">Demo accounts</p>
+        <div class="mt-2 text-xs text-slate-500 font-mono space-y-0.5">
           <div>Admin: admin&#64;tracker.com (p: admin)</div>
           <div>Manager: manager&#64;tracker.com (p: manager)</div>
           <div>Member: member&#64;tracker.com (p: member)</div>

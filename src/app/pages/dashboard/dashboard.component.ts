@@ -215,6 +215,14 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  formatStatus(value: TaskStatus | TaskPriority): string {
+    return value
+      .toLowerCase()
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
   mathMin(a: number, b: number): number {
     return Math.min(a, b);
   }
