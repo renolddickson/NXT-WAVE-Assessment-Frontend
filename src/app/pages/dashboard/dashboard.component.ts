@@ -54,8 +54,14 @@ export class DashboardComponent implements OnInit {
   // Kanban status columns list
   readonly statuses: TaskStatus[] = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'BLOCKED', 'DONE'];
 
+  activeTasks = computed(() => this.tasks().filter(task => task.status !== 'DONE').length);
+  blockedTasks = computed(() => this.tasks().filter(task => task.status === 'BLOCKED').length);
+  highPriorityTasks = computed(() => this.tasks().filter(task => task.priority === 'HIGH').length);
+
   ngOnInit(): void {
-    this.loadUsers();
+    if (!this.isMember()) {
+      this.loadUsers();
+    }
     this.loadTasks();
   }
 
