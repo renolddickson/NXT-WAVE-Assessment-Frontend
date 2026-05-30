@@ -192,14 +192,16 @@
                 </div>
               </div>
 
-              <!-- Status advancement buttons -->
-              <div *ngIf="canAdvance(task) && getValidTransitions(task.status).length > 0" class="pt-2 border-t border-slate-100 flex flex-wrap gap-1">
-                <span class="text-[9px] font-bold text-slate-400 w-full mb-1">Move to:</span>
-                <button *ngFor="let next of getValidTransitions(task.status)"
-                        (click)="advanceStatus(task, next)"
-                        class="px-1.5 py-0.5 rounded border border-slate-200 bg-white text-[9px] font-extrabold text-slate-650 hover:bg-slate-50 cursor-pointer shadow-xxs">
-                  ➜ {{ formatStatus(next) }}
-                </button>
+              <!-- Status advancement dropdown -->
+              <div *ngIf="canAdvance(task)" class="pt-2 border-t border-slate-100 flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400">Change Status</label>
+                <select (change)="onStatusChange(task, $event)"
+                        class="block w-full px-2 py-1 border border-slate-200 bg-white rounded text-[10px] font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 cursor-pointer shadow-xxs">
+                  <option [value]="task.status" selected>{{ formatStatus(task.status) }}</option>
+                  <option *ngFor="let next of getValidTransitions(task.status)" [value]="next">
+                    ➜ {{ formatStatus(next) }}
+                  </option>
+                </select>
               </div>
             </div>
           </article>
@@ -258,8 +260,24 @@
 
             <!-- Status -->
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex flex-col space-y-1.5">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border w-fit"
+              <div class="flex flex-col space-y-1" *ngIf="canAdvance(task); else staticStatus">
+                <select (change)="onStatusChange(task, $event)"
+                        [ngClass]="{
+                          'bg-slate-50 text-slate-700 border-slate-200': task.status === 'TODO',
+                          'bg-blue-50 text-blue-700 border-blue-200': task.status === 'IN_PROGRESS',
+                          'bg-amber-50 text-amber-700 border-amber-200': task.status === 'IN_REVIEW',
+                          'bg-red-50 text-red-700 border-red-200': task.status === 'BLOCKED',
+                          'bg-emerald-50 text-emerald-700 border-emerald-200': task.status === 'DONE'
+                        }"
+                        class="block px-2.5 py-1 border rounded-full text-[10px] font-bold focus:outline-none cursor-pointer shadow-xxs">
+                  <option [value]="task.status" selected>{{ formatStatus(task.status) }}</option>
+                  <option *ngFor="let next of getValidTransitions(task.status)" [value]="next">
+                    ➜ {{ formatStatus(next) }}
+                  </option>
+                </select>
+              </div>
+              <ng-template #staticStatus>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold border"
                       [ngClass]="{
                         'bg-slate-50 text-slate-700 border-slate-200': task.status === 'TODO',
                         'bg-blue-50 text-blue-700 border-blue-200': task.status === 'IN_PROGRESS',
@@ -269,16 +287,7 @@
                       }">
                   {{ formatStatus(task.status) }}
                 </span>
-                
-                <!-- Status Advancement controls inside Table View -->
-                <div *ngIf="canAdvance(task) && getValidTransitions(task.status).length > 0" class="flex flex-wrap gap-1">
-                  <button *ngFor="let next of getValidTransitions(task.status)"
-                          (click)="advanceStatus(task, next)"
-                          class="px-1.5 py-0.5 border border-slate-200 text-[9.5px] font-extrabold rounded bg-slate-50 hover:bg-slate-100 transition-colors text-slate-650 cursor-pointer shadow-xxs">
-                    ➜ {{ formatStatus(next) }}
-                  </button>
-                </div>
-              </div>
+              </ng-template>
             </td>
 
             <!-- Due Date -->

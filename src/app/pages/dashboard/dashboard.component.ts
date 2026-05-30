@@ -205,6 +205,13 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  onStatusChange(task: Task, event: any): void {
+    const nextStatus = event.target.value as TaskStatus;
+    if (nextStatus !== task.status) {
+      this.advanceStatus(task, nextStatus);
+    }
+  }
+
   // Helper method to group tasks by status for columns
   getTasksByStatus(status: TaskStatus): Task[] {
     return this.tasks().filter(t => t.status === status);
