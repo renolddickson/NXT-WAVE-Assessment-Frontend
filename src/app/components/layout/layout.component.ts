@@ -23,6 +23,14 @@ export class LayoutComponent {
   currentUser = this.authService.currentUser;
   isAdmin = this.authService.isAdmin;
 
+  get pageTitle(): string {
+    const url = this.router.url;
+    if (url.includes('/dashboard')) return 'Dashboard';
+    if (url.includes('/projects')) return 'Projects';
+    if (url.includes('/users')) return 'Users';
+    return 'Task Board';
+  }
+
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {

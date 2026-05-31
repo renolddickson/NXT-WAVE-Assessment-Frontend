@@ -110,7 +110,7 @@ export class AuthService {
   refreshToken(): Observable<AuthResponse> {
     const rToken = this.getRefreshToken();
     if (!rToken) {
-      this.logout();
+      this.clearSession();
       return throwError(() => new Error('No refresh token available'));
     }
 
@@ -133,23 +133,23 @@ export class AuthService {
     );
   }
 
-  logout(): Observable<void> {
-    const cleanup = () => {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      this.currentUser.set(null);
-    };
+  clearSession(): void {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    this.currentUser.set(null);
+  }
 
+  logout(): Observable<void> {
     if (this.useMock) {
-      cleanup();
+      this.clearSession();
       return of(void 0);
     }
 
     return this.http.post<void>(`${this.API_URL}/logout`, {}).pipe(
       tap({
-        next: () => cleanup(),
-        error: () => cleanup() // Clean up local storage even if API logout fails
+        next: () => this.clearSession(),
+        error: () => this.clearSession() // Clean up local storage even if API logout fails
       })
     );
   }

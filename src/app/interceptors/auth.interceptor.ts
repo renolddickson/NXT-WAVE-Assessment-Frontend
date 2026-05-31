@@ -1,5 +1,6 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { catchError, switchMap, filter, take } from 'rxjs/operators';
 import { throwError, BehaviorSubject, Observable } from 'rxjs';
@@ -9,6 +10,7 @@ const refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const router = inject(Router);
 
   const isAuthEndpoint = req.url.includes('/auth/login') || req.url.includes('/auth/register') || req.url.includes('/auth/refresh');
   const token = authService.getAccessToken();
@@ -26,7 +28,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError(error => {
       // Catch 401 responses for non-auth endpoints to trigger token refresh
       if (error.status === 401 && !isAuthEndpoint) {
-        return handle401Error(authReq, next, authService);
+        return handle401Error(authReq, next, authService, router);
       }
       
       // Extract API validation errors cleanly
@@ -67,7 +69,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   );
 };
 
-function handle401Error(req: HttpRequest<unknown>, next: HttpHandlerFn, authService: AuthService): Observable<HttpEvent<unknown>> {
+function handle401Error(req: HttpRequest<unknown>, next: HttpHandlerFn, authService: AuthService, router: Router): Observable<HttpEvent<unknown>> {
   if (!isRefreshing) {
     isRefreshing = true;
     refreshTokenSubject.next(null);
@@ -86,7 +88,8 @@ function handle401Error(req: HttpRequest<unknown>, next: HttpHandlerFn, authServ
       }),
       catchError(err => {
         isRefreshing = false;
-        authService.logout();
+        authService.clearSession();
+        router.navigate(['/login']);
         return throwError(() => err);
       })
     );
