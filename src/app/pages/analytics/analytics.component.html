@@ -1,0 +1,196 @@
+<div class="space-y-6">
+  <!-- Dynamic Page Header -->
+  <div class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center border-b border-slate-150 pb-5">
+    <div>
+      <h1 class="text-xl font-bold text-slate-900 tracking-tight">Analytics Dashboard</h1>
+      <p class="text-xs text-slate-500 mt-1.5 leading-normal">
+        Monitor overdue workloads and evaluate average task completion times across team members.
+      </p>
+    </div>
+    
+    <button (click)="loadAnalytics()" [disabled]="isLoading()"
+            class="inline-flex items-center justify-center px-4 py-2 border border-slate-200 text-xs font-semibold rounded-md text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 transition-all shadow-xxs cursor-pointer gap-1.5">
+      <span class="material-icons-outlined text-sm" [ngClass]="{'animate-spin': isLoading()}">sync</span>
+      <span>Refresh Data</span>
+    </button>
+  </div>
+
+  <!-- Error Banner Alert -->
+  <div *ngIf="errorMessage()" class="bg-red-50 border border-red-200 p-4 rounded-md" role="alert">
+    <div class="flex justify-between items-start gap-4">
+      <div class="flex gap-2.5">
+        <span class="material-icons-outlined text-red-600 text-lg">error_outline</span>
+        <p class="text-xs text-red-700 font-semibold leading-relaxed">{{ errorMessage() }}</p>
+      </div>
+      <button (click)="errorMessage.set(null)" class="text-red-500 hover:text-red-800 cursor-pointer">✕</button>
+    </div>
+  </div>
+
+  <!-- Loading State Indicator -->
+  <div *ngIf="isLoading()" class="flex justify-center items-center py-20">
+    <div class="flex flex-col items-center gap-3">
+      <svg class="animate-spin h-7 w-7 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="text-xs text-slate-500 font-semibold">Aggregating team metrics...</span>
+    </div>
+  </div>
+
+  <!-- Main View Renderings -->
+  <div *ngIf="!isLoading()" class="space-y-6">
+    
+    <!-- Aggregate Cards Row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- 1. Total Overdue Tasks Card -->
+      <div class="bg-white border border-slate-200 rounded-md p-5 flex items-center gap-4 shadow-xxs">
+        <div class="h-11 w-11 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shadow-sm shrink-0">
+          <span class="material-icons-outlined text-lg leading-none">warning</span>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Overdue Tasks</div>
+          <div class="mt-1 text-3xl font-semibold leading-none" 
+               [ngClass]="totalOverdue() > 0 ? 'text-red-650' : 'text-slate-950'">
+            {{ totalOverdue() }}
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Team Avg Completion Time Card -->
+      <div class="bg-white border border-slate-200 rounded-md p-5 flex items-center gap-4 shadow-xxs">
+        <div class="h-11 w-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm shrink-0">
+          <span class="material-icons-outlined text-lg leading-none">speed</span>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Team Avg Velocity</div>
+          <div class="mt-1 text-3xl font-semibold text-slate-950 leading-none">
+            {{ teamAvgCompletionTime() !== null ? teamAvgCompletionTime() + ' hrs' : 'N/A' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Monitored Team Members Card -->
+      <div class="bg-white border border-slate-200 rounded-md p-5 flex items-center gap-4 shadow-xxs">
+        <div class="h-11 w-11 rounded-lg bg-slate-950 text-white flex items-center justify-center shadow-sm shrink-0">
+          <span class="material-icons-outlined text-lg leading-none">badge</span>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Monitored Members</div>
+          <div class="mt-1 text-3xl font-semibold text-slate-950 leading-none">
+            {{ totalMembers() }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Per-User Breakdowns Card Table -->
+    <div class="bg-white border border-slate-200 rounded-lg shadow-xxs overflow-hidden">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="text-sm font-bold text-slate-900 font-sans">Team Performance Directory</h3>
+        <span class="text-xxs font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200/50">
+          Real-time updates
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-left">
+          <thead class="bg-slate-50 text-xxs font-bold text-slate-400 uppercase tracking-wider">
+            <tr>
+              <th scope="col" class="px-6 py-3.5">Team Member</th>
+              <th scope="col" class="px-6 py-3.5">System Role</th>
+              <th scope="col" class="px-6 py-3.5">Overdue Workload</th>
+              <th scope="col" class="px-6 py-3.5">Avg Completion Speed</th>
+              <th scope="col" class="px-6 py-3.5 text-right">Performance Indicator</th>
+            </tr>
+          </thead>
+          
+          <tbody class="divide-y divide-slate-100 text-xs text-slate-600">
+            <tr *ngFor="let item of analyticsData()" class="hover:bg-slate-50/30 transition-colors">
+              
+              <!-- User Profile Identity -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 rounded-full bg-slate-950 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                    {{ item.user.name.charAt(0) }}
+                  </div>
+                  <div>
+                    <div class="font-bold text-slate-900 leading-snug">{{ item.user.name }}</div>
+                    <div class="text-[10px] text-slate-400 font-medium leading-normal">{{ item.user.email }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- System Role Badge -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border"
+                      [ngClass]="getRoleBadgeClass(item.user.role)">
+                  {{ item.user.role }}
+                </span>
+              </td>
+
+              <!-- Overdue Task Count Indicator -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <span *ngIf="item.overdueTaskCount > 0" 
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xxs font-bold bg-red-50 text-red-700 border border-red-150">
+                    <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                    {{ item.overdueTaskCount }} overdue
+                  </span>
+                  
+                  <span *ngIf="item.overdueTaskCount === 0" 
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xxs font-bold bg-emerald-50 text-emerald-700 border border-emerald-150">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                    On track
+                  </span>
+                </div>
+              </td>
+
+              <!-- Average Completion Hours -->
+              <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-700">
+                <div class="flex items-center gap-1.5">
+                  <span class="material-icons-outlined text-slate-400 text-xs">schedule</span>
+                  <span>{{ item.avgCompletionTimeHours !== null ? item.avgCompletionTimeHours + ' hrs' : 'No data yet' }}</span>
+                </div>
+              </td>
+
+              <!-- Speed Bar Visualizer -->
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <div class="flex items-center justify-end gap-3.5">
+                  <div class="w-24 bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200/50 shrink-0" *ngIf="item.avgCompletionTimeHours !== null">
+                    <!-- Standardize completion speeds: 30 hours is mapped to 100% -->
+                    <div class="h-full rounded-full transition-all duration-500"
+                         [ngClass]="{
+                           'bg-emerald-500': item.avgCompletionTimeHours <= 12,
+                           'bg-amber-500': item.avgCompletionTimeHours > 12 && item.avgCompletionTimeHours <= 24,
+                           'bg-red-500': item.avgCompletionTimeHours > 24
+                         }"
+                         [style.width.%]="mathMin(item.avgCompletionTimeHours * 3.33, 100)">
+                    </div>
+                  </div>
+                  
+                  <span class="text-[10px] font-bold uppercase tracking-wider shrink-0"
+                        [ngClass]="{
+                          'text-emerald-600': item.avgCompletionTimeHours !== null && item.avgCompletionTimeHours <= 12,
+                          'text-amber-600': item.avgCompletionTimeHours !== null && item.avgCompletionTimeHours > 12 && item.avgCompletionTimeHours <= 24,
+                          'text-red-550': item.avgCompletionTimeHours !== null && item.avgCompletionTimeHours > 24,
+                          'text-slate-400 italic': item.avgCompletionTimeHours === null
+                        }">
+                    {{ item.avgCompletionTimeHours === null ? 'Inactive' : (item.avgCompletionTimeHours <= 12 ? 'Fast' : (item.avgCompletionTimeHours <= 24 ? 'Moderate' : 'Slow')) }}
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Empty Fallback Layout -->
+      <div *ngIf="analyticsData().length === 0" 
+           class="flex flex-col items-center justify-center py-20 bg-slate-50 border-t border-slate-100 text-center">
+        <span class="material-icons-outlined text-slate-400 text-4xl">analytics</span>
+        <h3 class="mt-2 text-sm font-semibold text-slate-900 font-sans">No analytics data</h3>
+        <p class="mt-1 text-xs text-slate-500 font-sans">Create tasks and advance them to DONE to compile velocity indexes.</p>
+      </div>
+    </div>
+  </div>
+</div>

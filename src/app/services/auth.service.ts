@@ -146,7 +146,8 @@ export class AuthService {
       return of(void 0);
     }
 
-    return this.http.post<void>(`${this.API_URL}/logout`, {}).pipe(
+    const refreshToken = this.getRefreshToken() || '';
+    return this.http.post<void>(`${this.API_URL}/logout`, { refreshToken }).pipe(
       tap({
         next: () => this.clearSession(),
         error: () => this.clearSession() // Clean up local storage even if API logout fails

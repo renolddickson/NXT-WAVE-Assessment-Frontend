@@ -23,6 +23,12 @@ export const routes: Routes = [
         canActivate: [authGuard], 
         data: { expectedRoles: ['ADMIN'] } 
       },
+      { 
+        path: 'analytics', 
+        loadComponent: () => import('./pages/analytics/analytics.component').then(m => m.AnalyticsComponent),
+        canActivate: [authGuard], 
+        data: { expectedRoles: ['ADMIN', 'MANAGER'] } 
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

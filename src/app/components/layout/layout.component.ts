@@ -22,12 +22,14 @@ export class LayoutComponent {
 
   currentUser = this.authService.currentUser;
   isAdmin = this.authService.isAdmin;
+  isManager = this.authService.isManager;
 
   get pageTitle(): string {
     const url = this.router.url;
     if (url.includes('/dashboard')) return 'Dashboard';
     if (url.includes('/projects')) return 'Projects';
     if (url.includes('/users')) return 'Users';
+    if (url.includes('/analytics')) return 'Analytics';
     return 'Task Board';
   }
 
