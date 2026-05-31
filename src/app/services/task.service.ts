@@ -4,6 +4,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { delay, tap } from 'rxjs/operators';
 import { Task, TaskStatus, TaskPriority } from '../models/types';
 import { MOCK_TASKS, MOCK_USERS, MOCK_PROJECTS } from '../models/mock-db';
+import { environment } from '../../environments/environment';
 
 export interface TasksResponse {
   tasks: Task[];
@@ -19,7 +20,7 @@ export interface TasksResponse {
   providedIn: 'root'
 })
 export class TaskService {
-  private readonly API_URL = 'http://localhost:3000/api/tasks';
+  private readonly API_URL = `${environment.apiUrl}/tasks`;
   
   public useMock = false;
 

@@ -4,12 +4,13 @@ import { Observable, of, throwError } from 'rxjs';
 import { tap, delay } from 'rxjs/operators';
 import { User, AuthResponse } from '../models/types';
 import { MOCK_USERS } from '../models/mock-db';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:3000/api/auth';
+  private readonly API_URL = `${environment.apiUrl}/auth`;
   
   public useMock = false;
 

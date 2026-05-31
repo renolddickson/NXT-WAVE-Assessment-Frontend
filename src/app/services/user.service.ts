@@ -4,12 +4,13 @@ import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { User } from '../models/types';
 import { MOCK_USERS } from '../models/mock-db';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private readonly API_URL = 'http://localhost:3000/api/users';
+  private readonly API_URL = `${environment.apiUrl}/users`;
   
   public useMock = false;
 

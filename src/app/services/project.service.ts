@@ -4,12 +4,13 @@ import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Project } from '../models/types';
 import { MOCK_PROJECTS } from '../models/mock-db';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
-  private readonly API_URL = 'http://localhost:3000/api/projects';
+  private readonly API_URL = `${environment.apiUrl}/projects`;
   
   public useMock = false;
 

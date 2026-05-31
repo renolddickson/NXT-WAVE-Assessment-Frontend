@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { User } from '../models/types';
 import { MOCK_USERS } from '../models/mock-db';
+import { environment } from '../../environments/environment';
 
 export interface UserAnalytics {
   user: User;
@@ -19,7 +20,7 @@ export interface TaskAnalyticsResponse {
   providedIn: 'root'
 })
 export class AnalyticsService {
-  private readonly API_URL = 'http://localhost:3000/api/analytics/tasks';
+  private readonly API_URL = `${environment.apiUrl}/analytics/tasks`;
   
   public useMock = false;
 
