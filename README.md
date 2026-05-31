@@ -1,5 +1,8 @@
 # Team Task Tracker Frontend
 
+* **Frontend Repository**: https://github.com/renolddickson/NXT-WAVE-Assessment-Frontend
+* **Backend Repository**: https://github.com/renolddickson/NXT-WAVE-Assessment-Backend
+
 Angular frontend for the Team Task Tracker application. The main active development branch for this repository is `DEVELOPMENT`.
 
 ---
